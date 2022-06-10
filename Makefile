@@ -7,6 +7,7 @@ NXDK_NET = y
 #Include my files
 SRCS += \
 	$(wildcard $(CURDIR)/src/*.cpp) \
+	$(wildcard $(CURDIR)/src/Generated/*.cpp) \
 	$(wildcard $(CURDIR)/src/lvgl-extra/*.cpp) \
 	$(wildcard $(CURDIR)/src/lvgl-style/*.c) \
 	$(wildcard $(CURDIR)/src/scenes/*.cpp)
@@ -20,11 +21,13 @@ CFLAGS += \
 	-I$(CURDIR)/include \
 	-I$(CURDIR)/src \
 	-DLWIP_HTTPC_HAVE_FILE_IO \
+	-DSDL_DISABLE_JOYSTICK_INIT_DELAY \
 	-O2
 CXXFLAGS += \
 	-I$(CURDIR)/include \
 	-I$(CURDIR)/src \
 	-DLWIP_HTTPC_HAVE_FILE_IO \
+	-DSDL_DISABLE_JOYSTICK_INIT_DELAY \
 	-O2
 
 #Include lvgl main library

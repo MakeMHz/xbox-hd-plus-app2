@@ -23,15 +23,17 @@ SceneRoot::SceneRoot()
 {
     // Set the size and position of our scene
     lv_obj_set_size(cont, 320, 420);
-    lv_obj_set_pos(screen, 380, 20);
+    lv_obj_set_pos(cont, 380, 20);
     lv_cont_set_layout(cont, LV_LAYOUT_COLUMN_LEFT);
 
     // Draw our child scene buttons
     //btnSelfTest        = CreateSubSceneButton("Self Test");
+    btnSystemSettings  = CreateSubSceneButton("System Settings");
     btnVideoSettings   = CreateSubSceneButton("Video Settings");
     btnAdvanceSettings = CreateSubSceneButton("Advance Settings");
     btnFirmware        = CreateSubSceneButton("Check for Update");
-    //btnAbout           = CreateSubSceneButton("About & Credits");
+    btnUserManual      = CreateSubSceneButton("User Manual");
+    btnAbout           = CreateSubSceneButton("About & Credits");
 
     // Draw back button in default location
     DrawBackButton("Exit");
@@ -50,9 +52,6 @@ lv_obj_t *SceneRoot::CreateSubSceneButton(const char *text) {
     // TODO: Possible memory leak?
     lv_obj_t *label = lv_label_create(btn, NULL);
     lv_label_set_text(label, text);
-
-    // TODO: Move to proper styles
-    setButtonStyles(btn);
 
     //
     lv_group_add_obj_warp(group, ButtonEventHandler, static_cast<lv_obj_user_data_t>(this), btn);
@@ -85,11 +84,17 @@ void SceneRoot::OnObjectEvent(lv_obj_t* obj, lv_event_t event)
         if(obj == btnSelfTest) {
             load_scene = SCENE::SELF_TEST;
         }
+        if(obj == btnSystemSettings) {
+            load_scene = SCENE::SYSTEM_SETTINGS;
+        }
         if(obj == btnVideoSettings) {
             load_scene = SCENE::VIDEO_SETTINGS;
         }
         if(obj == btnAdvanceSettings) {
             load_scene = SCENE::ADVANCED_SETTINGS;
+        }
+        if(obj == btnUserManual) {
+            load_scene = SCENE::USER_MANUAL;
         }
         if(obj == btnFirmware) {
             update->check();

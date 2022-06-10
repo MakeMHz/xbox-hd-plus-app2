@@ -14,7 +14,7 @@ Scene::Scene()
 
     lv_obj_set_style_local_bg_opa(screen, LV_OBJMASK_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_TRANSP);
     lv_obj_set_style_local_border_width(screen, LV_OBJMASK_PART_MAIN, LV_STATE_DEFAULT, 0);
-    lv_obj_set_style_local_outline_width(screen, 0, LV_STATE_DEFAULT, 1);
+    lv_obj_set_style_local_outline_width(screen, 0, LV_STATE_DEFAULT, 0);
 
     lv_obj_set_size(screen, lv_obj_get_width(parent_screen), lv_obj_get_height(parent_screen));
     lv_obj_set_pos(screen, 0, 0);
@@ -50,17 +50,4 @@ void Scene::DrawBackButton(const char *text)
     lv_label_set_text(back_button_label, text);
     lv_obj_align(back_button_label, back_button_image, LV_ALIGN_CENTER, 42, 0);
     lv_obj_set_width(back_button_label, 200);
-}
-
-void Scene::setButtonMtxStyles(lv_obj_t * obj) {
-    lv_obj_set_style_local_border_width(obj, LV_OBJMASK_PART_MAIN, LV_STATE_DEFAULT, 0);
-    lv_obj_set_style_local_bg_opa(obj, LV_OBJMASK_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_TRANSP);
-    lv_obj_set_style_local_margin_all(obj, LV_OBJMASK_PART_MAIN, LV_STATE_DEFAULT, 0);
-    lv_obj_set_style_local_pad_all(obj, LV_OBJMASK_PART_MAIN, LV_STATE_DEFAULT, 0);
-    lv_obj_set_style_local_radius(obj, LV_OBJMASK_PART_MAIN, LV_STATE_DEFAULT, 10);
-}
-
-void Scene::setButtonStyles(lv_obj_t * obj) {
-    lv_obj_set_style_local_border_width(obj, LV_OBJMASK_PART_MAIN, LV_STATE_DEFAULT, 0);
-    lv_obj_set_style_local_radius(obj, LV_OBJMASK_PART_MAIN, LV_STATE_DEFAULT, 6);
 }

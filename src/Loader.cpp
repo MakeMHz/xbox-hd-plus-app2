@@ -54,7 +54,8 @@ int main_loader(void)
 
         mEEPROM->clear();
         mEEPROM->save();
-        mEEPROM->upload();
+
+        HalReturnToFirmware(HalRebootRoutine);
     }
 
     return 0;

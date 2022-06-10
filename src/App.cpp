@@ -5,10 +5,13 @@
 #include <hal/video.h>
 #include <hal/xbox.h>
 #include <nxdk/mount.h>
+#include <nxdk/path.h>
+#include <xboxkrnl/xboxkrnl.h>
 
 #include "App.h"
 #include "Assets.h"
 #include "EEPROM.h"
+#include "FatalError.h"
 #include "Network.h"
 #include "Scene.h"
 #include "System.h"
@@ -22,6 +25,9 @@
 #include "scenes/OverscanCorrection.h"
 #include "scenes/Root.h"
 #include "scenes/SelfTest.h"
+#include "scenes/SystemAudioSettings.h"
+#include "scenes/SystemSettings.h"
+#include "scenes/UserManual.h"
 #include "scenes/VideoSettings.h"
 
 #define printf(fmt, ...) debugPrint(fmt, __VA_ARGS__)
@@ -37,7 +43,10 @@ Update *update;
 
 int main_app(void)
 {
-    XVideoSetMode(width, height, LV_COLOR_DEPTH, REFRESH_DEFAULT);
+    if(!XVideoSetMode(width, height, LV_COLOR_DEPTH, REFRESH_DEFAULT)) {
+        HalReturnToFirmware(HalRebootRoutine);
+        return 0;
+    }
 
     // Mount the C partition
     nxMountDrive('C', "\\Device\\Harddisk0\\Partition2\\");
@@ -54,19 +63,25 @@ int main_app(void)
     lv_obj_set_pos(wp, 0, 0);
     lv_obj_set_width(wp, LV_HOR_RES);
 
+    // Verify that we launched from C://xboxhd//default.xbe
+    // TODO: If it's from the DVD drive then prompt to install? Or at least show an warning/error.
+    checkInstallDir();
+    checkInstallDirPatch();
+
+    // System checks
+    checkSystemRegion();
+
     drawFirmwareVersion();
     drawSoftwareVersion();
     drawPatchVersion();
 
     checkPatchVersion();
+
     // Check if firmware needs to be updated
     checkFirmwareV2();
     checkFirmwareLastest();
 
     // TODO: Verify patch.bin is loaded
-
-    // TODO: Verify that we launched from C://xboxhd//default.xbe
-    // If it's from the DVD drive then prompt to install? Or at least show an warning/error.
 
     //
     gEEPROM = new EEPROM();
@@ -85,8 +100,20 @@ int main_app(void)
                 currentScene = new SceneRoot();
                 current_scene = load_scene;
                 break;
+            case SCENE::SYSTEM_SETTINGS:
+                currentScene = new SystemSettings();
+                current_scene = load_scene;
+                break;
+            case SCENE::SYSTEM_AUDIO_SETTINGS:
+                currentScene = new SystemAudioSettings();
+                current_scene = load_scene;
+                break;
             case SCENE::ADVANCED_SETTINGS:
                 currentScene = new AdvanceSettings();
+                current_scene = load_scene;
+                break;
+            case SCENE::USER_MANUAL:
+                currentScene = new UserManual();
                 current_scene = load_scene;
                 break;
             case SCENE::COLOR_CORRECTION:
@@ -127,6 +154,9 @@ int main_app(void)
     lv_sdl_deinit_input();
     lv_sdl_deinit_display();
     lv_deinit();
+
+    // Reboot Xbox so kpatch has a chance to reload
+    HalReturnToFirmware(HalRebootRoutine);
 
     return 0;
 }
@@ -325,4 +355,34 @@ void checkFirmwareLastest() {
             Sleep(15);
         }
     }
+}
+
+void checkInstallDir() {
+    char allowedPath[] = "\\Device\\Harddisk0\\Partition2\\xboxhd\\default.xbe";
+    char launchPath[MAX_PATH];
+    nxGetCurrentXbeNtPath(launchPath);
+
+    if(strcmp(launchPath, allowedPath) != 0)
+        DisplayFatalError("ERROR: The XboxHD app must be installed in\nC:\\xboxhd");
+}
+
+void checkInstallDirPatch() {
+    FILE *file = fopen("D:\\kp.bin", "r");
+    if(!file)
+        DisplayFatalError("ERROR: XboxHD+ installation corrupt.\n(Missing File: kp.bin)\n\nPlease verify/reinstall the XboxHD+ files.");
+    fclose(file);
+}
+
+void checkSystemRegion() {
+    ULONG type, value;
+
+    // AV Region
+    ExQueryNonVolatileSetting(259, &type,  &value, sizeof(value), NULL);
+    if(((value & 0xFF00) >> 8) != 1)
+        DisplayFatalError("ERROR: Invalid system AV region. Please change AV region to NTSC before continuing.");
+
+    // Game region
+    ExQueryNonVolatileSetting(260, &type,  &value, sizeof(value), NULL);
+    if(value != 1)
+        DisplayFatalError("ERROR: Invalid system game region. Please change game region to NTSC before continuing.");
 }

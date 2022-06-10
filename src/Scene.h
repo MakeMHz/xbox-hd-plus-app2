@@ -11,8 +11,6 @@ class Scene {
 
         void DrawBackButton();
         void DrawBackButton(const char *text);
-        void setButtonMtxStyles(lv_obj_t * obj);
-        void setButtonStyles(lv_obj_t * obj);
 
         lv_obj_t *parent_screen;
         lv_obj_t *screen;
@@ -29,7 +27,10 @@ class Scene {
 
 enum SCENE {
     ROOT,
+    SYSTEM_SETTINGS,
+    SYSTEM_AUDIO_SETTINGS,
     ADVANCED_SETTINGS,
+    USER_MANUAL,
     INTERPOLATION_SETTINGS,
     SELF_TEST,
     VIDEO_SETTINGS,
